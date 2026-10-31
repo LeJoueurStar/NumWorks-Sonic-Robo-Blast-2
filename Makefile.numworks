@@ -1,0 +1,49 @@
+# Makefile dédié NumWorks pour SRB2 (le build PC reste en CMake)
+# Usage : make -f Makefile.numworks
+
+PREFIX  ?= arm-none-eabi-
+CC      := $(PREFIX)gcc
+OBJCOPY := $(PREFIX)objcopy
+NWLINK  ?= nwlink
+
+BUILD   := build-numworks
+TARGET  := $(BUILD)/srb2
+
+# Processeur de la N0110 (à vérifier pour la N0120 dans NumPlay)
+CPU     := -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard
+
+# src/sdl/ est exclu : c'est src/port/ qui le remplace
+# comptime.c et apng.c sont exclus pour l'instant (config.h et libpng absents)
+EXCLUDE := src/comptime.c src/apng.c
+SRCS    := $(filter-out $(EXCLUDE),$(wildcard src/*.c)) $(wildcard src/port/*.c)
+OBJS    := $(patsubst %.c,$(BUILD)/%.o,$(SRCS))
+DEPS    := $(OBJS:.o=.d)
+
+DEFS    := -DNUMWORKS -DNOEXECINFO -D_LARGEFILE64_SOURCE
+INCS    := -Isrc -Isrc/port -Inumworks
+
+CFLAGS  := $(CPU) -std=gnu11 -O2 -fwrapv -ffunction-sections -fdata-sections \
+           -Wall -Wno-trigraphs $(DEFS) $(INCS) -MMD -MP
+
+# Script de liaison et options à copier depuis NumPlay (numworks/linker.ld)
+LDFLAGS := $(CPU) -T numworks/linker.ld -Wl,--gc-sections \
+           -Wl,-Map=$(BUILD)/srb2.map
+
+.PHONY: all clean
+
+all: $(TARGET).nwa
+
+$(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TARGET).elf: $(OBJS)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+$(TARGET).nwa: $(TARGET).elf
+	$(NWLINK) elf2nwa $< $@
+
+clean:
+	rm -rf $(BUILD)
+
+-include $(DEPS)
