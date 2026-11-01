@@ -10,27 +10,31 @@
 /// \file  i_main.c
 /// \brief Point d'entrée NumWorks : protection Epsilon, puis D_SRB2Main et D_SRB2Loop
 
+#include <setjmp.h>
+
 #include "../doomdef.h"
 #include "../m_argv.h"
 #include "../d_main.h"
 #include "../i_system.h"
 #include "epsilon_app.h"
 
+// Défini ici, utilisé par i_system.c pour revenir ici à la fin du jeu
+jmp_buf np_quit_jmp;
+
 int main(int argc, char **argv)
 {
 	myargc = argc;
 	myargv = argv;
 
-	// Home ne doit pas interrompre le jeu en plein milieu (voir epsilon_app.h)
 	np_app_begin();
 
-	CONS_Printf("Setting up SRB2...\n");
-	D_SRB2Main();
-
-	CONS_Printf("Entering main game loop...\n");
-	// D_SRB2Loop ne revient jamais : la sortie passe par I_Quit (src/port/i_system.c),
-	// qui appellera np_app_end() avant de rendre la calculatrice.
-	D_SRB2Loop();
+	if (setjmp(np_quit_jmp) == 0)
+	{
+		CONS_Printf("Setting up SRB2...\n");
+		D_SRB2Main();
+		CONS_Printf("Entering main game loop...\n");
+		D_SRB2Loop();
+	}
 
 	return np_app_end();
 }
