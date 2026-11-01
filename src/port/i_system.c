@@ -31,6 +31,15 @@
 #include "../w_wad.h"
 #include "epsilon_app.h"
 
+/* Table des fonctions de sortie (dans la version SDL, elle est dans i_system.c) */
+#define MAX_QUIT_FUNCS 16
+static void (*quit_funcs[MAX_QUIT_FUNCS])(void);
+
+/* Fonctions définies ailleurs dans le moteur, déclarées ici pour le compilateur */
+void CL_AbortDownloadResume(void);
+void M_FreePlayerSetupColors(void);
+void I_ShutdownInput(void);
+
 // Défini dans src/port/i_main.c : retour propre vers main() (voir plus bas)
 extern jmp_buf np_quit_jmp;
 
