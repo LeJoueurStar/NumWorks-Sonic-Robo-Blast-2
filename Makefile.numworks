@@ -1,0 +1,75 @@
+# Makefile NumWorks pour SRB2 (le build PC reste en CMake)
+#   make            output/srb2.nwa
+#   make check      vérifie la taille de output/srb2.bin
+# TOOLCHAIN=<dossier bin> si arm-none-eabi-gcc n'est pas dans le PATH
+
+Q ?= @
+TOOLCHAIN ?=
+BIN = $(if $(TOOLCHAIN),$(TOOLCHAIN)/)
+CC = $(BIN)arm-none-eabi-gcc
+CXX = $(BIN)arm-none-eabi-g++
+NWLINK ?= npx --yes -- nwlink@1.0.0
+STRIP ?= $(BIN)arm-none-eabi-strip --strip-unneeded
+SIZE = $(BIN)arm-none-eabi-size
+BUILD_DIR = output
+
+# le moteur : src/CMakeLists.txt, sans sdl/, hardware/, blua/, netcode/
+# comptime.c et apng.c sont exclus pour l'instant (config.h généré, libpng absente)
+CORE = md5.c string.c d_main.c dehacked.c deh_soc.c deh_lua.c deh_tables.c z_zone.c \
+  f_finale.c f_wipe.c g_demo.c g_game.c g_input.c am_map.c command.c console.c hu_stuff.c \
+  i_time.c y_inter.c st_stuff.c m_aatree.c m_anigif.c m_argv.c m_bbox.c m_cheat.c m_cond.c \
+  m_easing.c m_fixed.c m_menu.c m_misc.c m_perfstats.c m_random.c m_tokenizer.c m_queue.c \
+  m_vector.c info.c p_ceilng.c p_enemy.c p_floor.c p_inter.c p_lights.c p_map.c p_maputl.c \
+  p_mobj.c p_polyobj.c p_saveg.c p_setup.c p_sight.c p_spec.c p_telept.c p_tick.c p_user.c \
+  p_slopes.c tables.c r_bsp.c r_data.c r_draw.c r_fps.c r_main.c r_plane.c r_segs.c r_skins.c \
+  r_sky.c r_splats.c r_things.c r_bbox.c r_textures.c r_translation.c r_patch.c \
+  r_patchrotation.c r_picformats.c r_portal.c screen.c taglist.c v_video.c s_sound.c sounds.c \
+    w_wad.c lzf.c b_bot.c u_list.c snake.c \
+  lua_script.c lua_baselib.c lua_mathlib.c lua_hooklib.c lua_consolelib.c lua_infolib.c \
+  lua_mobjlib.c lua_playerlib.c lua_skinlib.c lua_thinkerlib.c lua_maplib.c lua_taglib.c \
+  lua_polyobjlib.c lua_blockmaplib.c lua_hudlib.c lua_hudlib_drawlist.c lua_colorlib.c \
+  lua_inputlib.c
+
+# la couche NumWorks : src/port/ remplace src/sdl/
+SRCS = $(addprefix src/,$(CORE)) $(wildcard src/port/*.c)
+OBJS = $(patsubst src/%.c,$(BUILD_DIR)/obj/%.o,$(SRCS))
+HEADERS = $(wildcard src/*.h src/port/*.h numworks/*.h numworks/common/*.h)
+
+INC = -include numworks/config.h -Isrc -Isrc/port -Inumworks -Inumworks/common
+DEFS = -DNUMWORKS -DEPSILON_XL=1 -DNOEXECINFO -D_LARGEFILE64_SOURCE -DNDEBUG
+ARCH = $(shell $(NWLINK) eadk-cflags-device)
+COMMON = $(ARCH) $(INC) $(DEFS) -Os -fno-math-errno -fno-unwind-tables \
+  -fno-asynchronous-unwind-tables -fsingle-precision-constant -ffunction-sections \
+  -fdata-sections -fwrapv -flto -fno-fat-lto-objects -fvisibility=internal
+CFLAGS = -std=gnu11 -Wall $(COMMON)
+LDFLAGS = -Wl,--relocatable -nostartfiles --specs=nano.specs \
+  -Wl,-e,main -Wl,-u,eadk_app_name -Wl,-u,eadk_app_icon -Wl,-u,eadk_api_level \
+  -Wl,--gc-sections -flinker-output=nolto-rel
+
+.PHONY: all check clean
+all: $(BUILD_DIR)/srb2.nwa
+
+$(BUILD_DIR)/obj/%.o: src/%.c $(HEADERS)
+	@mkdir -p $(@D)
+	$(Q) $(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/icon.o: numworks/icon.png
+	@mkdir -p $(@D)
+	$(Q) $(NWLINK) png-icon-o $< $@
+
+$(BUILD_DIR)/srb2.nwa: $(OBJS) $(BUILD_DIR)/icon.o
+	@echo "LD      $@"
+	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) $^ -lm -o $@
+	$(Q) $(STRIP) $@
+	$(Q) $(SIZE) $@
+
+# le RAM d'une app : 133652 octets sur Epsilon personnalisé (voir le Makefile de NumPlay)
+check: $(BUILD_DIR)/srb2.nwa
+	$(Q) $(NWLINK) nwa-bin --ram-length 133652 $< $(BUILD_DIR)/srb2.bin
+	@echo "BIN     $(BUILD_DIR)/srb2.bin: $$(wc -c < $(BUILD_DIR)/srb2.bin) octets"
+	@test $$(wc -c < $(BUILD_DIR)/srb2.bin) -le 2031616 || { echo "trop grand pour la flash"; exit 1; }
+
+clean:
+	$(Q) rm -rf $(BUILD_DIR)
+
+-include $(OBJS:.o=.d)

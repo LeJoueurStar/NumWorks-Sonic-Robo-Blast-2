@@ -1,0 +1,31 @@
+name: Build NumWorks
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer la toolchain ARM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi
+
+      - name: Installer nwlink
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g nwlink@1.0.0
+
+      - name: Compiler l'app NumWorks
+        run: make -f Makefile.numworks NWLINK=nwlink
+
+      - name: Sauvegarder le .nwa
+        uses: actions/upload-artifact@v4
+        with:
+          name: srb2-numworks
+          path: output/
