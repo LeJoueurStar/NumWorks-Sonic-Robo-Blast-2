@@ -15,7 +15,6 @@
 
 UINT8 sound_started = 0;
 
-consvar_t cv_samplerate; // valeur à zéro : pas de son, rien à régler
 // depuis src/sdl/i_sound.c (c'est une ligne consvar_t).
 
 void *I_GetSfx(sfxinfo_t *sfx) { return NULL; }
