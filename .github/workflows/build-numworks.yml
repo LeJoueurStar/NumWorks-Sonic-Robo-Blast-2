@@ -36,3 +36,4 @@ jobs:
           path: |
             output/srb2.nwa
             output/srb2.bin
+            output/srb2.map
