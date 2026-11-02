@@ -44,7 +44,8 @@ COMMON = $(ARCH) $(INC) $(DEFS) -Os -fno-math-errno -fno-unwind-tables \
 CFLAGS = -std=gnu11 -Wall $(COMMON)
 LDFLAGS = -Wl,--relocatable -nostartfiles --specs=nano.specs \
   -Wl,-e,main -Wl,-u,eadk_app_name -Wl,-u,eadk_app_icon -Wl,-u,eadk_api_level \
-  -Wl,--gc-sections -flinker-output=nolto-rel
+       -Wl,--gc-sections -flinker-output=nolto-rel \
+     -Wl,-Map=$(BUILD_DIR)/srb2.map
 
 .PHONY: all check clean
 all: $(BUILD_DIR)/srb2.nwa
