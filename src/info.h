@@ -4417,7 +4417,7 @@ typedef struct
 	UINT16 sprite2;
 } state_t;
 
-extern state_t states[NUMSTATES];
+const extern state_t states[NUMSTATES];
 extern char sprnames[NUMSPRITES + 1][MAXSPRITENAME + 1];
 extern char spr2names[NUMPLAYERSPRITES][MAXSPRITENAME + 1];
 extern playersprite_t spr2defaults[NUMPLAYERSPRITES];
