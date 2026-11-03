@@ -712,7 +712,7 @@ playersprite_t spr2defaults[NUMPLAYERSPRITES] = {
 };
 
 // Doesn't work with g++, needs actionf_p1 (don't modify this comment)
-state_t states[NUMSTATES] =
+const state_t states[NUMSTATES] =
 {
 	// frame is masked through FF_FRAMEMASK
 	// FF_ANIMATE makes simple state animations (var1 #frames, var2 tic delay)
