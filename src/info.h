@@ -5240,7 +5240,7 @@ typedef struct
 	statenum_t raisestate;
 } mobjinfo_t;
 
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
+const extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
 
 void P_PatchInfoTables(void);
 
