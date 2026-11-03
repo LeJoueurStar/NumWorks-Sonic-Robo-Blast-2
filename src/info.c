@@ -4039,7 +4039,7 @@ const state_t states[NUMSTATES] =
 	{SPR_OLDK, 2, -1, A_ZThrust, 14, 1|(1<<16), S_NULL, 0}, // S_OLDK_DIE2
 };
 
-mobjinfo_t mobjinfo[NUMMOBJTYPES] =
+const mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 {
 	{           // MT_NULL
 		-1,             // doomednum
