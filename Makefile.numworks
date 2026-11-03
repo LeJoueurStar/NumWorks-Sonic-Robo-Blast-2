@@ -15,7 +15,7 @@ BUILD_DIR = output
 
 # le moteur : src/CMakeLists.txt, sans sdl/, hardware/, blua/, netcode/
 # comptime.c et apng.c sont exclus pour l'instant (config.h généré, libpng absente)
-CORE = md5.c string.c d_main.c dehacked.c deh_soc.c deh_lua.c deh_tables.c z_zone.c \
+  d_main.c deh_tables.c z_zone.c \
   f_finale.c f_wipe.c g_demo.c g_game.c g_input.c am_map.c command.c console.c hu_stuff.c \
   i_time.c y_inter.c st_stuff.c m_aatree.c m_anigif.c m_argv.c m_bbox.c m_cheat.c m_cond.c \
   m_easing.c m_fixed.c m_menu.c m_misc.c m_perfstats.c m_random.c m_tokenizer.c m_queue.c \
