@@ -172,7 +172,7 @@ angle_t FixedAngle(fixed_t fa)
 #include "t_ftan.c"
 
 #include "t_fsin.c"
-fixed_t *finecosine = &finesine[FINEANGLES/4];
+const fixed_t *finecosine = &finesine[FINEANGLES/4];
 
 #include "t_tan2a.c"
 
