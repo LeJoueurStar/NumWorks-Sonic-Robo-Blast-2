@@ -1007,15 +1007,7 @@ static void OP_CycleThings(INT32 amt)
 
 	// HACK, minus has SPR_NULL sprite
 	if (states[mobjinfo[op_currentthing].spawnstate].sprite == SPR_NULL)
-	{
-		states[S_OBJPLACE_DUMMY].sprite = states[mobjinfo[op_currentthing].seestate].sprite;
-		states[S_OBJPLACE_DUMMY].frame = states[mobjinfo[op_currentthing].seestate].frame;
-	}
-	else
-	{
-		states[S_OBJPLACE_DUMMY].sprite = states[mobjinfo[op_currentthing].spawnstate].sprite;
-		states[S_OBJPLACE_DUMMY].frame = states[mobjinfo[op_currentthing].spawnstate].frame;
-	}
+	
 	if (players[0].mo->eflags & MFE_VERTICALFLIP) // correct z when flipped
 		players[0].mo->z += players[0].mo->height - FixedMul(mobjinfo[op_currentthing].height, players[0].mo->scale);
 	players[0].mo->height = FixedMul(mobjinfo[op_currentthing].height, players[0].mo->scale);
